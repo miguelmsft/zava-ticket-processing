@@ -17,6 +17,35 @@ Tickets arrive (simulating a Salesforce integration), and the system automatical
 
 ---
 
+## Application Screenshots
+
+### Tab 1 — Ticket Ingestion
+Users submit new tickets with PDF invoices attached, choosing from pre-built demo scenarios or entering custom data.
+
+![Tab 1 — Ticket Ingestion](docs/screenshots/tab1_ticket_ingestion.png)
+
+### Tab 2 — Extraction Results
+Structured data extracted from the PDF invoice, including vendor details, line items, amounts, and confidence scores.
+
+![Tab 2 — Extraction Results](docs/screenshots/tab2_extraction_results.png)
+
+### Tab 3 — AI Processing
+The Foundry AI agent standardizes codes, generates a summary, and assigns the next action for the ticket.
+
+![Tab 3 — AI Processing](docs/screenshots/tab3_ai_processing.png)
+
+### Tab 4 — Invoice Processing
+Automated validation checklist (invoice number, amount, due date, vendor approval) and payment submission status.
+
+![Tab 4 — Invoice Processing](docs/screenshots/tab4_invoice_processing.png)
+
+### Tab 5 — Dashboard
+Overall pipeline metrics including total tickets processed, success rate, average processing times, and status distribution.
+
+![Tab 5 — Dashboard](docs/screenshots/tab5_dashboard.png)
+
+---
+
 ## Architecture Overview
 
 ```
