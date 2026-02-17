@@ -41,8 +41,18 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     }
     // Disable key-based auth in production; use RBAC via Managed Identity
     disableLocalAuth: false
-    // Allow public network access for Container Apps (no VNet integration in demo)
+    // ── Network access ─────────────────────────────────────────────────────
+    // Allow public network access for Container Apps and Function Apps.
+    // In production, replace with Private Endpoints + VNet integration.
     publicNetworkAccess: 'Enabled'
+    // Allow Azure services (Functions, Container Apps) to bypass the firewall.
+    // AzureServices = Azure Functions, Logic Apps, and other first-party services
+    // can connect even when IP rules are configured.
+    networkAclBypass: 'AzureServices'
+    networkAclBypassResourceIds: []
+    // No IP restrictions for the demo — all public IPs are allowed.
+    // In production, lock this down to specific IPs or use Private Endpoints.
+    ipRules: []
   }
 }
 
