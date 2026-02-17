@@ -1,0 +1,247 @@
+{
+  "vendor_codes": {
+    "description": "Maps vendor names to standardized vendor codes used in Zava Processing Inc. ERP system",
+    "mappings": {
+      "ABC Industrial Supplies": {
+        "vendorCode": "ABCIND-001",
+        "region": "US-South",
+        "paymentTerms": "NET-30",
+        "approved": true,
+        "category": "Industrial Equipment"
+      },
+      "Delta Chemical Solutions": {
+        "vendorCode": "DELTCH-002",
+        "region": "US-West",
+        "paymentTerms": "NET-15",
+        "approved": true,
+        "category": "Chemical Supplies"
+      },
+      "Pinnacle Precision Parts": {
+        "vendorCode": "PINPRE-003",
+        "region": "US-Midwest",
+        "paymentTerms": "NET-30",
+        "approved": true,
+        "category": "Precision Manufacturing"
+      },
+      "Summit Electrical Corp": {
+        "vendorCode": "SUMELE-004",
+        "region": "US-Northeast",
+        "paymentTerms": "NET-45",
+        "approved": true,
+        "category": "Electrical Components"
+      },
+      "Oceanic Freight Logistics": {
+        "vendorCode": "OCEFRT-005",
+        "region": "International",
+        "paymentTerms": "NET-30",
+        "approved": true,
+        "category": "Logistics & Shipping"
+      },
+      "Greenfield Environmental Services": {
+        "vendorCode": "GRNENV-006",
+        "region": "US-South",
+        "paymentTerms": "NET-30",
+        "approved": false,
+        "category": "Environmental Compliance"
+      }
+    }
+  },
+  "product_codes": {
+    "description": "Maps raw product codes from vendor invoices to Zava Processing Inc. standardized product codes",
+    "mappings": {
+      "VLV-4200-IND": {
+        "standardCode": "ZAVA-VLV-4200-IND-STD",
+        "productName": "Industrial Grade Valve Assembly (Model V-4200)",
+        "category": "Valves & Flow Control",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 125.00, "max": 175.00 }
+      },
+      "SK-HP-4200": {
+        "standardCode": "ZAVA-SK-HP-4200-STD",
+        "productName": "High-Pressure Seal Kit (Compatible V-4200)",
+        "category": "Seals & Gaskets",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 40.00, "max": 65.00 }
+      },
+      "CHEM-HCL-500": {
+        "standardCode": "ZAVA-CHEM-HCL-500-HAZ",
+        "productName": "Hydrochloric Acid Solution 500mL (Hazardous)",
+        "category": "Chemical Reagents",
+        "unitOfMeasure": "BTL",
+        "expectedPriceRange": { "min": 18.00, "max": 28.00 },
+        "hazardous": true
+      },
+      "CHEM-NAOH-1L": {
+        "standardCode": "ZAVA-CHEM-NAOH-1L-HAZ",
+        "productName": "Sodium Hydroxide Solution 1L (Hazardous)",
+        "category": "Chemical Reagents",
+        "unitOfMeasure": "BTL",
+        "expectedPriceRange": { "min": 12.00, "max": 22.00 },
+        "hazardous": true
+      },
+      "PPE-CHEM-KIT": {
+        "standardCode": "ZAVA-PPE-CHEM-KIT-STD",
+        "productName": "Chemical Handling PPE Kit",
+        "category": "Safety Equipment",
+        "unitOfMeasure": "KIT",
+        "expectedPriceRange": { "min": 75.00, "max": 120.00 }
+      },
+      "BRG-6205-2RS": {
+        "standardCode": "ZAVA-BRG-6205-2RS-STD",
+        "productName": "Sealed Ball Bearing 6205-2RS",
+        "category": "Bearings & Bushings",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 8.00, "max": 15.00 }
+      },
+      "BRG-6308-ZZ": {
+        "standardCode": "ZAVA-BRG-6308-ZZ-STD",
+        "productName": "Shielded Ball Bearing 6308-ZZ",
+        "category": "Bearings & Bushings",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 12.00, "max": 22.00 }
+      },
+      "SHF-D50-L300": {
+        "standardCode": "ZAVA-SHF-D50-L300-STD",
+        "productName": "Precision Ground Shaft 50mm x 300mm",
+        "category": "Shafts & Couplings",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 85.00, "max": 130.00 }
+      },
+      "MTR-3PH-5HP": {
+        "standardCode": "ZAVA-MTR-3PH-5HP-STD",
+        "productName": "3-Phase AC Motor 5HP",
+        "category": "Motors & Drives",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 450.00, "max": 650.00 }
+      },
+      "CBL-12AWG-500": {
+        "standardCode": "ZAVA-CBL-12AWG-500-STD",
+        "productName": "12 AWG Stranded Copper Wire 500ft Spool",
+        "category": "Electrical Wire & Cable",
+        "unitOfMeasure": "SPOOL",
+        "expectedPriceRange": { "min": 120.00, "max": 180.00 }
+      },
+      "PNL-CB-20A": {
+        "standardCode": "ZAVA-PNL-CB-20A-STD",
+        "productName": "20A Circuit Breaker Panel",
+        "category": "Electrical Panels & Breakers",
+        "unitOfMeasure": "EA",
+        "expectedPriceRange": { "min": 210.00, "max": 310.00 }
+      },
+      "FRT-FCL-40": {
+        "standardCode": "ZAVA-FRT-FCL-40-STD",
+        "productName": "Full Container Load (40ft) Shipping",
+        "category": "Freight & Logistics",
+        "unitOfMeasure": "SHIPMENT",
+        "expectedPriceRange": { "min": 3500.00, "max": 5500.00 }
+      },
+      "FRT-LCL-PLT": {
+        "standardCode": "ZAVA-FRT-LCL-PLT-STD",
+        "productName": "Less Than Container Load (Per Pallet) Shipping",
+        "category": "Freight & Logistics",
+        "unitOfMeasure": "PALLET",
+        "expectedPriceRange": { "min": 350.00, "max": 600.00 }
+      },
+      "FRT-CUSTOMS": {
+        "standardCode": "ZAVA-FRT-CUSTOMS-STD",
+        "productName": "Customs Brokerage & Clearance Fee",
+        "category": "Freight & Logistics",
+        "unitOfMeasure": "SERVICE",
+        "expectedPriceRange": { "min": 600.00, "max": 1200.00 }
+      },
+      "FRT-PORT-HDL": {
+        "standardCode": "ZAVA-FRT-PORT-HDL-STD",
+        "productName": "Port Handling & Terminal Charges",
+        "category": "Freight & Logistics",
+        "unitOfMeasure": "SERVICE",
+        "expectedPriceRange": { "min": 800.00, "max": 1800.00 }
+      },
+      "FRT-TRUCK-LB-BT": {
+        "standardCode": "ZAVA-FRT-TRUCK-LB-BT-STD",
+        "productName": "Inland Trucking - Long Beach to Baytown, TX",
+        "category": "Freight & Logistics",
+        "unitOfMeasure": "TRIP",
+        "expectedPriceRange": { "min": 2200.00, "max": 3500.00 }
+      },
+      "FRT-INS-AR": {
+        "standardCode": "ZAVA-FRT-INS-AR-STD",
+        "productName": "Cargo Insurance (All Risk Coverage)",
+        "category": "Freight & Logistics",
+        "unitOfMeasure": "POLICY",
+        "expectedPriceRange": { "min": 500.00, "max": 1500.00 }
+      },
+      "ENV-HWCT-Q": {
+        "standardCode": "ZAVA-ENV-HWCT-Q-STD",
+        "productName": "Hazardous Waste Collection & Transport (Quarterly)",
+        "category": "Environmental Compliance",
+        "unitOfMeasure": "SERVICE",
+        "expectedPriceRange": { "min": 3500.00, "max": 6000.00 }
+      },
+      "ENV-CWTD-GAL": {
+        "standardCode": "ZAVA-ENV-CWTD-GAL-STD",
+        "productName": "Chemical Waste Treatment & Disposal (Per Gallon)",
+        "category": "Environmental Compliance",
+        "unitOfMeasure": "GAL",
+        "expectedPriceRange": { "min": 2.50, "max": 5.00 }
+      },
+      "ENV-EPA-DOC": {
+        "standardCode": "ZAVA-ENV-EPA-DOC-STD",
+        "productName": "EPA Manifest Documentation & Compliance Filing",
+        "category": "Environmental Compliance",
+        "unitOfMeasure": "SERVICE",
+        "expectedPriceRange": { "min": 250.00, "max": 500.00 }
+      }
+    }
+  },
+  "department_codes": {
+    "description": "Maps product categories to Zava Processing Inc. department and cost center codes",
+    "mappings": {
+      "Valves & Flow Control": { "departmentCode": "PROC-MFG-001", "costCenter": "CC-4500", "department": "Manufacturing - Process Line" },
+      "Seals & Gaskets": { "departmentCode": "PROC-MFG-001", "costCenter": "CC-4500", "department": "Manufacturing - Process Line" },
+      "Chemical Reagents": { "departmentCode": "PROC-LAB-002", "costCenter": "CC-4600", "department": "Laboratory & Quality Control" },
+      "Safety Equipment": { "departmentCode": "OPS-SAFE-003", "costCenter": "CC-4700", "department": "Operations - Safety" },
+      "Bearings & Bushings": { "departmentCode": "PROC-MFG-001", "costCenter": "CC-4500", "department": "Manufacturing - Process Line" },
+      "Shafts & Couplings": { "departmentCode": "PROC-MFG-001", "costCenter": "CC-4500", "department": "Manufacturing - Process Line" },
+      "Motors & Drives": { "departmentCode": "PROC-MFG-004", "costCenter": "CC-4800", "department": "Manufacturing - Power Systems" },
+      "Electrical Wire & Cable": { "departmentCode": "PROC-MFG-004", "costCenter": "CC-4800", "department": "Manufacturing - Power Systems" },
+      "Electrical Panels & Breakers": { "departmentCode": "PROC-MFG-004", "costCenter": "CC-4800", "department": "Manufacturing - Power Systems" },
+      "Freight & Logistics": { "departmentCode": "OPS-LOG-005", "costCenter": "CC-4900", "department": "Operations - Logistics" },
+      "Environmental Compliance": { "departmentCode": "OPS-ENV-006", "costCenter": "CC-5000", "department": "Operations - Environmental" }
+    }
+  },
+  "action_codes": {
+    "description": "Maps conditions to next actions in the ticket processing pipeline",
+    "mappings": {
+      "valid_invoice_all_checks_pass": {
+        "nextAction": "invoice_processing",
+        "description": "Invoice is valid, proceed to automated payment processing"
+      },
+      "amount_discrepancy_detected": {
+        "nextAction": "manual_review",
+        "description": "Amount does not match expected range, requires human review"
+      },
+      "vendor_not_approved": {
+        "nextAction": "vendor_approval",
+        "description": "Vendor is not in approved vendor list, requires procurement approval"
+      },
+      "hazardous_materials_present": {
+        "nextAction": "invoice_processing",
+        "description": "Hazardous materials detected, invoice processing with EHS compliance flag",
+        "flags": ["EHS_REVIEW_REQUIRED"]
+      },
+      "past_due_invoice": {
+        "nextAction": "invoice_processing",
+        "description": "Invoice is past due, prioritize for expedited payment",
+        "flags": ["EXPEDITED_PAYMENT"]
+      },
+      "duplicate_invoice_suspected": {
+        "nextAction": "manual_review",
+        "description": "Possible duplicate invoice detected, requires human verification"
+      },
+      "budget_exceeded": {
+        "nextAction": "budget_approval",
+        "description": "Invoice amount exceeds department budget threshold, requires manager approval"
+      }
+    }
+  }
+}

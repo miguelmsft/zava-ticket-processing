@@ -1,0 +1,32 @@
+# Backend dependencies for Zava Processing Inc. Ticket Processing System
+# FastAPI + Azure services
+#
+# Version pins updated 2026-02-07 to match dev environment.
+# Use compatible-release (~=) for minor-version flexibility.
+
+# Web framework
+fastapi~=0.121.0
+uvicorn[standard]~=0.38.0
+python-multipart~=0.0.20
+
+# Configuration
+python-dotenv~=1.2.0
+pydantic-settings~=2.12.0
+
+# Azure Cosmos DB
+azure-cosmos~=4.14.0
+
+# Azure Blob Storage
+azure-storage-blob~=12.27.0
+
+# Azure Identity (DefaultAzureCredential for managed identity)
+azure-identity~=1.25.0
+
+# Azure Content Understanding (Stage A - extraction)
+azure-ai-contentunderstanding==1.0.0b1
+
+# PDF extraction (basic metadata via PyMuPDF)
+PyMuPDF~=1.25.0
+
+# Utilities
+httpx~=0.28.0

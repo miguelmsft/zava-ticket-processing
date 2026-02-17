@@ -1,0 +1,70 @@
+# ───────────────────────────────────────────────────────
+# Zava Ticket Processing — .gitignore
+# ───────────────────────────────────────────────────────
+
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# ── Virtual environments ────────────────────────────────
+.venv/
+venv/
+ENV/
+
+# ── Testing / caching ──────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ── IDE / editor ───────────────────────────────────────
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Node / Frontend ────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/node_modules/
+.eslintcache
+
+# ── Environment & secrets ──────────────────────────────
+.env
+.env.local
+.env.*.local
+local.settings.json
+frontend/.env.production
+
+# ── Azure ───────────────────────────────────────────────
+# .azure/ has its own .gitignore — leave it alone
+*.zip
+infra/main.json
+
+# ── Playwright MCP artifacts ───────────────────────────
+.playwright-mcp/
+
+# ── OS files ────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Deployment / debug logs (temp artifacts) ───────────
+*.log
+
+# ── Internal documentation (kept local-only) ───────────
+PLAN.md
+.github/copilot-instructions.md

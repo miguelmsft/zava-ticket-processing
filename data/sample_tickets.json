@@ -1,0 +1,377 @@
+[
+  {
+    "ticketId": "ZAVA-2026-00001",
+    "title": "Invoice Processing Request - ABC Industrial Supplies - Valve Assemblies",
+    "description": "Please process the attached invoice from ABC Industrial Supplies for valve assemblies and seal kits ordered for the Q1 maintenance cycle on Process Line 4. This is a standard reorder under PO-2026-1150. All items have been received and inspected by the warehouse team. Delivery was confirmed on January 20, 2026.",
+    "tags": ["invoice", "vendor-abc", "maintenance", "process-line-4"],
+    "priority": "normal",
+    "submitter": "john.doe@zavaprocessing.com",
+    "submitterName": "John Doe",
+    "submitterDepartment": "Procurement",
+    "attachmentFilename": "INV_ABC_Industrial_2026_78432.pdf",
+    "scenario": "happy_path",
+    "scenarioDescription": "Standard invoice, all validations pass, payment submitted successfully",
+    "expectedOutcome": {
+      "extraction": "success",
+      "aiProcessing": "valid_invoice_all_checks_pass",
+      "nextAction": "invoice_processing",
+      "invoiceProcessing": "payment_submitted"
+    },
+    "invoiceData": {
+      "invoiceNumber": "INV-2026-78432",
+      "poNumber": "PO-2026-1150",
+      "vendorName": "ABC Industrial Supplies",
+      "vendorAddress": "123 Industrial Way, Houston, TX 77001",
+      "vendorPhone": "(713) 555-0142",
+      "vendorEmail": "billing@abcindustrial.com",
+      "billTo": "Zava Processing Inc., 4500 Refinery Blvd, Baytown, TX 77520",
+      "invoiceDate": "2026-01-22",
+      "dueDate": "2026-02-21",
+      "lineItems": [
+        {
+          "description": "Industrial Grade Valve Assembly (Model V-4200)",
+          "productCode": "VLV-4200-IND",
+          "quantity": 50,
+          "unitPrice": 150.00,
+          "amount": 7500.00
+        },
+        {
+          "description": "High-Pressure Seal Kit (Compatible V-4200)",
+          "productCode": "SK-HP-4200",
+          "quantity": 100,
+          "unitPrice": 50.00,
+          "amount": 5000.00
+        }
+      ],
+      "subtotal": 12500.00,
+      "taxRate": 0.0825,
+      "taxAmount": 1031.25,
+      "totalAmount": 13531.25,
+      "paymentTerms": "NET-30",
+      "currency": "USD"
+    }
+  },
+  {
+    "ticketId": "ZAVA-2026-00002",
+    "title": "URGENT: Chemical Supply Invoice - Delta Chemical Solutions - Lab Reagents",
+    "description": "Urgent processing needed for Delta Chemical Solutions invoice. These are hazardous chemical reagents required for the quality control lab. The chemicals are needed for the FDA compliance testing scheduled for next week. The invoice includes hydrochloric acid and sodium hydroxide solutions, plus PPE kits. Hazardous materials handling surcharge is included. Please expedite payment as Delta has a NET-15 payment term.",
+    "tags": ["invoice", "vendor-delta", "urgent", "hazardous", "lab-supplies", "fda-compliance"],
+    "priority": "urgent",
+    "submitter": "maria.garcia@zavaprocessing.com",
+    "submitterName": "Maria Garcia",
+    "submitterDepartment": "Quality Control",
+    "attachmentFilename": "INV_Delta_Chemical_2026_DC4410.pdf",
+    "scenario": "hazardous_materials",
+    "scenarioDescription": "Urgent invoice with hazardous materials flag, valid but requires EHS compliance check",
+    "expectedOutcome": {
+      "extraction": "success",
+      "aiProcessing": "hazardous_materials_present",
+      "nextAction": "invoice_processing",
+      "invoiceProcessing": "payment_submitted_with_flags"
+    },
+    "invoiceData": {
+      "invoiceNumber": "DC-2026-4410",
+      "poNumber": "PO-2026-1203",
+      "vendorName": "Delta Chemical Solutions",
+      "vendorAddress": "890 Chemistry Park Dr, San Jose, CA 95131",
+      "vendorPhone": "(408) 555-0267",
+      "vendorEmail": "accounts@deltachem.com",
+      "billTo": "Zava Processing Inc., 4500 Refinery Blvd, Baytown, TX 77520",
+      "invoiceDate": "2026-01-28",
+      "dueDate": "2026-02-12",
+      "lineItems": [
+        {
+          "description": "Hydrochloric Acid Solution 500mL - ACS Grade",
+          "productCode": "CHEM-HCL-500",
+          "quantity": 24,
+          "unitPrice": 22.50,
+          "amount": 540.00
+        },
+        {
+          "description": "Sodium Hydroxide Solution 1L - Lab Grade",
+          "productCode": "CHEM-NAOH-1L",
+          "quantity": 12,
+          "unitPrice": 18.75,
+          "amount": 225.00
+        },
+        {
+          "description": "Chemical Handling PPE Kit (Gloves, Goggles, Apron)",
+          "productCode": "PPE-CHEM-KIT",
+          "quantity": 6,
+          "unitPrice": 89.99,
+          "amount": 539.94
+        }
+      ],
+      "subtotal": 1304.94,
+      "hazmatSurcharge": 150.00,
+      "taxRate": 0.0725,
+      "taxAmount": 105.48,
+      "totalAmount": 1560.42,
+      "paymentTerms": "NET-15",
+      "currency": "USD",
+      "hazardousFlag": true,
+      "dotClassification": "Class 8 - Corrosive Substances"
+    }
+  },
+  {
+    "ticketId": "ZAVA-2026-00003",
+    "title": "Invoice Processing Request - Pinnacle Precision Parts - Bearings & Shafts",
+    "description": "Attached is the invoice from Pinnacle Precision Parts for bearings and precision ground shafts for the turbine overhaul project. Note: I believe there may be a pricing error on line item 3 - the quoted price for the precision shafts was $95.00 each but the invoice shows $145.00. Please verify before processing payment.",
+    "tags": ["invoice", "vendor-pinnacle", "pricing-discrepancy", "turbine-overhaul"],
+    "priority": "normal",
+    "submitter": "robert.chen@zavaprocessing.com",
+    "submitterName": "Robert Chen",
+    "submitterDepartment": "Maintenance Engineering",
+    "attachmentFilename": "INV_Pinnacle_Precision_2026_PP7891.pdf",
+    "scenario": "amount_discrepancy",
+    "scenarioDescription": "Invoice has inflated unit price on one line item vs. expected range, AI should flag for manual review",
+    "expectedOutcome": {
+      "extraction": "success",
+      "aiProcessing": "amount_discrepancy_detected",
+      "nextAction": "manual_review",
+      "invoiceProcessing": "not_applicable"
+    },
+    "invoiceData": {
+      "invoiceNumber": "PP-2026-7891",
+      "poNumber": "PO-2026-1178",
+      "vendorName": "Pinnacle Precision Parts",
+      "vendorAddress": "2200 Precision Manufacturing Rd, Cleveland, OH 44114",
+      "vendorPhone": "(216) 555-0389",
+      "vendorEmail": "invoicing@pinnacleprecision.com",
+      "billTo": "Zava Processing Inc., 4500 Refinery Blvd, Baytown, TX 77520",
+      "invoiceDate": "2026-01-25",
+      "dueDate": "2026-02-24",
+      "lineItems": [
+        {
+          "description": "Sealed Ball Bearing 6205-2RS",
+          "productCode": "BRG-6205-2RS",
+          "quantity": 200,
+          "unitPrice": 11.50,
+          "amount": 2300.00
+        },
+        {
+          "description": "Shielded Ball Bearing 6308-ZZ",
+          "productCode": "BRG-6308-ZZ",
+          "quantity": 100,
+          "unitPrice": 18.75,
+          "amount": 1875.00
+        },
+        {
+          "description": "Precision Ground Shaft 50mm x 300mm",
+          "productCode": "SHF-D50-L300",
+          "quantity": 25,
+          "unitPrice": 145.00,
+          "amount": 3625.00,
+          "_note": "INTENTIONAL DISCREPANCY: Expected price is $85-130, invoice shows $145"
+        }
+      ],
+      "subtotal": 7800.00,
+      "taxRate": 0.0575,
+      "taxAmount": 448.50,
+      "totalAmount": 8248.50,
+      "paymentTerms": "NET-30",
+      "currency": "USD"
+    }
+  },
+  {
+    "ticketId": "ZAVA-2026-00004",
+    "title": "Invoice Processing Request - Summit Electrical Corp - Motor & Electrical Panel",
+    "description": "Submitting the invoice from Summit Electrical Corp for the replacement motor and electrical panel upgrades on Production Line 2. These items were delivered on December 15, 2025 and installation was completed on January 5, 2026. The invoice was originally due on January 30, 2026 but was delayed in our internal routing. Please process ASAP as this invoice is now past due.",
+    "tags": ["invoice", "vendor-summit", "past-due", "production-line-2", "electrical"],
+    "priority": "high",
+    "submitter": "sarah.williams@zavaprocessing.com",
+    "submitterName": "Sarah Williams",
+    "submitterDepartment": "Facilities Management",
+    "attachmentFilename": "INV_Summit_Electrical_2025_SE12088.pdf",
+    "scenario": "past_due_invoice",
+    "scenarioDescription": "Invoice is past due, AI should flag for expedited payment processing",
+    "expectedOutcome": {
+      "extraction": "success",
+      "aiProcessing": "past_due_invoice",
+      "nextAction": "invoice_processing",
+      "invoiceProcessing": "payment_submitted_expedited"
+    },
+    "invoiceData": {
+      "invoiceNumber": "SE-2025-12088",
+      "poNumber": "PO-2025-0987",
+      "vendorName": "Summit Electrical Corp",
+      "vendorAddress": "550 Power Grid Ave, Newark, NJ 07102",
+      "vendorPhone": "(973) 555-0451",
+      "vendorEmail": "ar@summitelectrical.com",
+      "billTo": "Zava Processing Inc., 4500 Refinery Blvd, Baytown, TX 77520",
+      "invoiceDate": "2025-12-16",
+      "dueDate": "2026-01-30",
+      "lineItems": [
+        {
+          "description": "3-Phase AC Motor 5HP (Replacement for PL-2 Station 7)",
+          "productCode": "MTR-3PH-5HP",
+          "quantity": 2,
+          "unitPrice": 575.00,
+          "amount": 1150.00
+        },
+        {
+          "description": "12 AWG Stranded Copper Wire 500ft Spool",
+          "productCode": "CBL-12AWG-500",
+          "quantity": 4,
+          "unitPrice": 145.00,
+          "amount": 580.00
+        },
+        {
+          "description": "20A Circuit Breaker Panel",
+          "productCode": "PNL-CB-20A",
+          "quantity": 3,
+          "unitPrice": 265.00,
+          "amount": 795.00
+        }
+      ],
+      "subtotal": 2525.00,
+      "taxRate": 0.06625,
+      "taxAmount": 167.28,
+      "totalAmount": 2692.28,
+      "paymentTerms": "NET-45",
+      "currency": "USD"
+    }
+  },
+  {
+    "ticketId": "ZAVA-2026-00005",
+    "title": "Freight Invoice - Oceanic Freight Logistics - Q1 Raw Materials Shipment",
+    "description": "Attached is the freight invoice from Oceanic Freight Logistics for the Q1 raw materials shipment arriving from our overseas supplier. This is a large multi-container shipment including full container load and palletized goods. The shipment includes customs clearance fees, port handling charges, and inland transportation. All documentation (bill of lading, customs declaration, certificates of origin) has been verified by our logistics team.",
+    "tags": ["invoice", "vendor-oceanic", "freight", "international", "q1-materials", "multi-line"],
+    "priority": "normal",
+    "submitter": "david.thompson@zavaprocessing.com",
+    "submitterName": "David Thompson",
+    "submitterDepartment": "Supply Chain",
+    "attachmentFilename": "INV_Oceanic_Freight_2026_OFL30055.pdf",
+    "scenario": "complex_multi_line",
+    "scenarioDescription": "Complex multi-line invoice with freight charges, customs fees, and handling — all valid",
+    "expectedOutcome": {
+      "extraction": "success",
+      "aiProcessing": "valid_invoice_all_checks_pass",
+      "nextAction": "invoice_processing",
+      "invoiceProcessing": "payment_submitted"
+    },
+    "invoiceData": {
+      "invoiceNumber": "OFL-2026-30055",
+      "poNumber": "PO-2026-1089",
+      "vendorName": "Oceanic Freight Logistics",
+      "vendorAddress": "1 Harbor View Plaza, Long Beach, CA 90802",
+      "vendorPhone": "(562) 555-0178",
+      "vendorEmail": "billing@oceanicfreight.com",
+      "billTo": "Zava Processing Inc., 4500 Refinery Blvd, Baytown, TX 77520",
+      "invoiceDate": "2026-02-01",
+      "dueDate": "2026-03-03",
+      "lineItems": [
+        {
+          "description": "Full Container Load (40ft) - Shanghai to Long Beach",
+          "productCode": "FRT-FCL-40",
+          "quantity": 2,
+          "unitPrice": 4250.00,
+          "amount": 8500.00
+        },
+        {
+          "description": "Less Than Container Load - Per Pallet (Consolidated Goods)",
+          "productCode": "FRT-LCL-PLT",
+          "quantity": 8,
+          "unitPrice": 475.00,
+          "amount": 3800.00
+        },
+        {
+          "description": "Customs Brokerage & Clearance Fee",
+          "productCode": "FRT-CUSTOMS",
+          "quantity": 1,
+          "unitPrice": 850.00,
+          "amount": 850.00
+        },
+        {
+          "description": "Port Handling & Terminal Charges",
+          "productCode": "FRT-PORT-HDL",
+          "quantity": 1,
+          "unitPrice": 1200.00,
+          "amount": 1200.00
+        },
+        {
+          "description": "Inland Trucking - Long Beach to Baytown, TX",
+          "productCode": "FRT-TRUCK-LB-BT",
+          "quantity": 2,
+          "unitPrice": 2800.00,
+          "amount": 5600.00
+        },
+        {
+          "description": "Cargo Insurance (All Risk Coverage)",
+          "productCode": "FRT-INS-AR",
+          "quantity": 1,
+          "unitPrice": 950.00,
+          "amount": 950.00
+        }
+      ],
+      "subtotal": 20900.00,
+      "taxRate": 0.0,
+      "taxAmount": 0.00,
+      "totalAmount": 20900.00,
+      "paymentTerms": "NET-30",
+      "currency": "USD",
+      "billOfLading": "OOCL-2026-SH-LB-44210",
+      "vesselName": "OOCL Pacific Star",
+      "voyageNumber": "V.026E"
+    }
+  },
+  {
+    "ticketId": "ZAVA-2026-00006",
+    "title": "Invoice Processing Request - Greenfield Environmental Services - Waste Disposal",
+    "description": "Please process the attached invoice from Greenfield Environmental Services for the quarterly hazardous waste disposal service at our Baytown facility. Note: I'm not sure if Greenfield is still on our approved vendor list — there was some discussion about switching providers last quarter. Please verify vendor status before processing.",
+    "tags": ["invoice", "vendor-greenfield", "waste-disposal", "environmental", "vendor-check"],
+    "priority": "normal",
+    "submitter": "lisa.park@zavaprocessing.com",
+    "submitterName": "Lisa Park",
+    "submitterDepartment": "Environmental Health & Safety",
+    "attachmentFilename": "INV_Greenfield_Env_2026_GES2200.pdf",
+    "scenario": "unapproved_vendor",
+    "scenarioDescription": "Vendor is not on the approved vendor list, AI should flag for vendor approval process",
+    "expectedOutcome": {
+      "extraction": "success",
+      "aiProcessing": "vendor_not_approved",
+      "nextAction": "vendor_approval",
+      "invoiceProcessing": "not_applicable"
+    },
+    "invoiceData": {
+      "invoiceNumber": "GES-2026-2200",
+      "poNumber": "PO-2026-1215",
+      "vendorName": "Greenfield Environmental Services",
+      "vendorAddress": "7700 Eco Park Lane, Baytown, TX 77521",
+      "vendorPhone": "(281) 555-0534",
+      "vendorEmail": "billing@greenfieldenv.com",
+      "billTo": "Zava Processing Inc., 4500 Refinery Blvd, Baytown, TX 77520",
+      "invoiceDate": "2026-02-03",
+      "dueDate": "2026-03-05",
+      "lineItems": [
+        {
+          "description": "Hazardous Waste Collection & Transport (Q1 2026)",
+          "productCode": "ENV-HWCT-Q",
+          "quantity": 1,
+          "unitPrice": 4500.00,
+          "amount": 4500.00
+        },
+        {
+          "description": "Chemical Waste Treatment & Disposal (2,500 gallons)",
+          "productCode": "ENV-CWTD-GAL",
+          "quantity": 2500,
+          "unitPrice": 3.25,
+          "amount": 8125.00
+        },
+        {
+          "description": "EPA Manifest Documentation & Compliance Filing",
+          "productCode": "ENV-EPA-DOC",
+          "quantity": 1,
+          "unitPrice": 350.00,
+          "amount": 350.00
+        }
+      ],
+      "subtotal": 12975.00,
+      "taxRate": 0.0825,
+      "taxAmount": 1070.44,
+      "totalAmount": 14045.44,
+      "paymentTerms": "NET-30",
+      "currency": "USD"
+    }
+  }
+]

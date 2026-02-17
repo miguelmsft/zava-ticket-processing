@@ -1,0 +1,292 @@
+openapi: "3.0.3"
+info:
+  title: Zava Payment Processing API
+  description: |
+    Simulated payment processing system for Zava Processing Inc.
+    Provides invoice validation, payment submission, and status checking.
+    Used by the Invoice Processing Foundry Agent V2 as an OpenAPI tool
+    to validate and submit invoices for payment.
+  version: "1.0.0"
+  contact:
+    name: Zava Processing Inc.
+
+servers:
+  - url: https://{apim-host}/payment
+    description: Azure API Management (production)
+    variables:
+      apim-host:
+        default: zava-apim.azure-api.net
+  - url: http://localhost:7073/api
+    description: Local development
+
+paths:
+  /payments/validate:
+    post:
+      operationId: validateInvoice
+      summary: Validate invoice before payment
+      description: |
+        Validates all invoice fields including:
+        - Invoice number format (INV-YYYY-NNNNN)
+        - Payment amount (positive, within limits)
+        - Due date validity and past-due status
+        - Vendor approval status
+        - Budget availability against vendor payment limits
+
+        Returns detailed validation results for each field plus an
+        overall readyForPayment boolean.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - invoiceNumber
+                - vendorCode
+                - amount
+              properties:
+                invoiceNumber:
+                  type: string
+                  description: Invoice number in format INV-YYYY-NNNNN
+                  example: "INV-2026-78432"
+                vendorCode:
+                  type: string
+                  description: Standardized vendor code from code mapping
+                  example: "ABCIND-001"
+                amount:
+                  type: number
+                  format: double
+                  description: Total payment amount
+                  example: 13531.25
+                dueDate:
+                  type: string
+                  description: Invoice due date (YYYY-MM-DD or common formats)
+                  example: "2026-02-15"
+                currency:
+                  type: string
+                  default: USD
+                  description: Currency code (defaults to USD)
+      responses:
+        "200":
+          description: Validation results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationResult"
+        "400":
+          description: Invalid JSON body
+
+  /payments/submit:
+    post:
+      operationId: submitPayment
+      summary: Submit invoice for payment
+      description: |
+        Submits an invoice for payment processing. The payment will be
+        assigned a unique payment ID and processed according to the
+        vendor's payment method.
+
+        Business rules:
+        - Approved vendors with valid amounts → payment submitted
+        - Unapproved vendors → payment rejected
+        - Amount exceeding vendor limit → requires budget approval
+        - Past-due invoices → expedited processing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - invoiceNumber
+                - vendorCode
+                - amount
+              properties:
+                invoiceNumber:
+                  type: string
+                  example: "INV-2026-78432"
+                vendorCode:
+                  type: string
+                  example: "ABCIND-001"
+                vendorName:
+                  type: string
+                  example: "ABC Industrial Supplies"
+                amount:
+                  type: number
+                  format: double
+                  example: 13531.25
+                currency:
+                  type: string
+                  default: USD
+                dueDate:
+                  type: string
+                  example: "2026-02-15"
+                ticketId:
+                  type: string
+                  description: The ticket ID this payment is associated with
+                  example: "ZAVA-2026-00001"
+                paymentMethod:
+                  type: string
+                  default: ACH Transfer
+                  enum:
+                    - ACH Transfer
+                    - Wire Transfer
+                    - Check
+      responses:
+        "200":
+          description: Payment submission result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSubmissionResult"
+        "400":
+          description: Invalid JSON body
+
+  /payments/status/{payment_id}:
+    get:
+      operationId: checkPaymentStatus
+      summary: Check payment status
+      description: |
+        Returns the current status of a payment submission.
+        Status progression: submitted → processing → completed.
+        Status automatically progresses based on elapsed time for simulation.
+      parameters:
+        - name: payment_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique payment ID returned by submit
+          example: "PAY-2026-54321"
+      responses:
+        "200":
+          description: Payment status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRecord"
+        "404":
+          description: Payment not found
+
+components:
+  schemas:
+    ValidationResult:
+      type: object
+      properties:
+        invoiceNumber:
+          type: string
+        allValid:
+          type: boolean
+          description: True if all validations passed
+        validations:
+          type: object
+          properties:
+            invoiceNumberValid:
+              type: boolean
+            invoiceNumberDetail:
+              type: string
+            amountValid:
+              type: boolean
+            amountDetail:
+              type: string
+            dueDateValid:
+              type: boolean
+            dueDateDetail:
+              type: string
+            vendorApproved:
+              type: boolean
+            vendorDetail:
+              type: string
+            budgetAvailable:
+              type: boolean
+            budgetDetail:
+              type: string
+        flags:
+          type: array
+          items:
+            type: string
+          description: Special processing flags (e.g., EXPEDITED_PAYMENT, PAST_DUE)
+        readyForPayment:
+          type: boolean
+        validatedAt:
+          type: string
+          format: date-time
+
+    PaymentSubmissionResult:
+      type: object
+      properties:
+        submitted:
+          type: boolean
+        paymentId:
+          type: string
+          description: Unique payment ID (only present if submitted=true)
+        invoiceNumber:
+          type: string
+        ticketId:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        paymentMethod:
+          type: string
+        status:
+          type: string
+          enum:
+            - submitted
+            - rejected
+        submittedAt:
+          type: string
+          format: date-time
+        expectedPaymentDate:
+          type: string
+          format: date
+        message:
+          type: string
+        error:
+          type: string
+          description: Error message (only present if submitted=false)
+        requiredAction:
+          type: string
+          description: Required action (only present if submitted=false)
+
+    PaymentRecord:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        invoiceNumber:
+          type: string
+        vendorCode:
+          type: string
+        vendorName:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        ticketId:
+          type: string
+        paymentMethod:
+          type: string
+        status:
+          type: string
+          enum:
+            - submitted
+            - processing
+            - completed
+        submittedAt:
+          type: string
+          format: date-time
+        expectedPaymentDate:
+          type: string
+          format: date
+        completedAt:
+          type: string
+          format: date-time
+          description: Only present when status is completed
+        dueDate:
+          type: string
+        approvedBy:
+          type: string

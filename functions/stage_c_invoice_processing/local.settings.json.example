@@ -1,0 +1,21 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+
+    "COSMOS_ENDPOINT": "https://localhost:8081",
+    "COSMOS_KEY": "YOUR_COSMOS_KEY",
+    "COSMOS_DATABASE": "zava-ticket-processing",
+    "COSMOS_USE_EMULATOR": "true",
+
+    "AI_PROJECT_ENDPOINT": "https://YOUR_FOUNDRY_RESOURCE.services.ai.azure.com/api/projects/YOUR_PROJECT",
+    "MODEL_DEPLOYMENT_NAME": "gpt-4o",
+
+    "MCP_COSMOS_ENDPOINT": "http://localhost:7071/runtime/webhooks/mcp",
+    "MCP_COSMOS_KEY": "",
+
+    "PAYMENT_API_ENDPOINT": "http://localhost:7073/api",
+    "PAYMENT_API_KEY": ""
+  }
+}

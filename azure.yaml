@@ -1,0 +1,126 @@
+## azure.yaml — Azure Developer CLI (azd) service manifest
+## Zava Processing Inc. Ticket Processing System
+##
+## Usage:
+##   azd up          # Provision + Deploy all services
+##   azd provision   # Provision Azure resources only
+##   azd deploy      # Deploy application code only
+##
+## See: https://learn.microsoft.com/azure/developer/azure-developer-cli/
+
+name: zava-ticket-processing
+metadata:
+  template: zava-ticket-processing@0.1.0
+
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
+# ---------------------------------------------------------------------------
+# Service definitions
+# Each service maps to an Azure resource via the 'azd-service-name' tag
+# ---------------------------------------------------------------------------
+services:
+  # ── Backend API (FastAPI on Azure Container Apps) ──────────────────────
+  backend:
+    host: containerapp
+    project: ./backend
+    language: python
+    docker:
+      path: ./Dockerfile
+
+  # ── Frontend UI (React + Vite on Azure Static Web Apps) ────────────────
+  frontend:
+    project: ./frontend
+    host: staticwebapp
+    language: js
+    dist: dist
+    build:
+      steps:
+        - run: npm install
+        - run: npm run build
+
+  # ── MCP Cosmos DB Server (Azure Functions) ─────────────────────────────
+  mcp-cosmos:
+    host: function
+    project: ./functions/mcp_cosmos
+    language: python
+
+  # ── Code Mapping API (Azure Functions) ─────────────────────────────────
+  api-code-mapping:
+    host: function
+    project: ./functions/api_code_mapping
+    language: python
+
+  # ── Payment Processing API (Azure Functions) ───────────────────────────
+  api-payment:
+    host: function
+    project: ./functions/api_payment
+    language: python
+
+  # ── Stage B: AI Information Processing (Azure Functions) ───────────────
+  stage-b:
+    host: function
+    project: ./functions/stage_b_ai_processing
+    language: python
+
+  # ── Stage C: Invoice Processing (Azure Functions) ──────────────────────
+  stage-c:
+    host: function
+    project: ./functions/stage_c_invoice_processing
+    language: python
+
+# ---------------------------------------------------------------------------
+# Hooks — lifecycle scripts
+# ---------------------------------------------------------------------------
+hooks:
+  preprovision:
+    windows:
+      shell: pwsh
+      run: |
+        # Auto-detect deployer's Azure AD principal ID for Foundry portal RBAC
+        $principalId = azd env get-value AZURE_PRINCIPAL_ID 2>$null
+        if (-not $principalId) {
+          Write-Host "Detecting deployer principal ID for Foundry portal access..."
+          $principalId = az ad signed-in-user show --query id -o tsv 2>$null
+          if ($principalId) {
+            azd env set AZURE_PRINCIPAL_ID $principalId
+            Write-Host "Set AZURE_PRINCIPAL_ID=$principalId"
+          } else {
+            Write-Host "WARNING: Could not detect principal ID. You may need to manually set AZURE_PRINCIPAL_ID to view agents in the Foundry portal."
+          }
+        } else {
+          Write-Host "AZURE_PRINCIPAL_ID already set: $principalId"
+        }
+    posix:
+      shell: sh
+      run: |
+        # Auto-detect deployer's Azure AD principal ID for Foundry portal RBAC
+        principalId=$(azd env get-value AZURE_PRINCIPAL_ID 2>/dev/null)
+        if [ -z "$principalId" ]; then
+          echo "Detecting deployer principal ID for Foundry portal access..."
+          principalId=$(az ad signed-in-user show --query id -o tsv 2>/dev/null)
+          if [ -n "$principalId" ]; then
+            azd env set AZURE_PRINCIPAL_ID "$principalId"
+            echo "Set AZURE_PRINCIPAL_ID=$principalId"
+          else
+            echo "WARNING: Could not detect principal ID. You may need to manually set AZURE_PRINCIPAL_ID to view agents in the Foundry portal."
+          fi
+        else
+          echo "AZURE_PRINCIPAL_ID already set: $principalId"
+        fi
+  postprovision:
+    windows:
+      shell: pwsh
+      run: Write-Host "Azure resources provisioned successfully."
+    posix:
+      shell: sh
+      run: echo "Azure resources provisioned successfully."
+  postdeploy:
+    windows:
+      shell: pwsh
+      run: python scripts/postdeploy.py
+    posix:
+      shell: sh
+      run: python scripts/postdeploy.py

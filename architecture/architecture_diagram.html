@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600">
+  <title>Zava Processing Inc. — Architecture Diagrams</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+    /* ── Header ────────────────────────────── */
+    .page-header {
+      background: linear-gradient(135deg, #0078d4 0%, #005a9e 50%, #003f72 100%);
+      color: #fff; padding: 36px 40px; text-align: center;
+    }
+    .page-header h1 { font-size: 1.9rem; font-weight: 600; }
+    .page-header p  { font-size: 1rem; opacity: 0.85; margin-top: 6px; }
+
+    /* ── Toggle ─────────────────────────────── */
+    .toggle-bar {
+      display: flex; justify-content: center; gap: 12px;
+      padding: 24px 20px 12px; position: sticky; top: 0; z-index: 100; background: #f0f2f5;
+    }
+    .toggle-btn {
+      padding: 11px 30px; border: 2px solid #0078d4; border-radius: 8px;
+      background: #fff; color: #0078d4; font-size: 0.93rem; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .toggle-btn:hover { background: #e8f4ff; }
+    .toggle-btn.active { background: #0078d4; color: #fff; box-shadow: 0 4px 12px rgba(0,120,212,.3); }
+
+    /* ── Diagram Section ────────────────────── */
+    .diagram-section { display: none; padding: 16px 20px 50px; overflow-x: auto; }
+    .diagram-section.visible { display: block; }
+    .diagram-title { text-align: center; font-size: 1.35rem; font-weight: 600; margin-bottom: 4px; }
+    .diagram-subtitle { text-align: center; font-size: 0.88rem; color: #666; margin-bottom: 24px; }
+
+    /* ── Canvas ──────────────────────────────── */
+    .canvas {
+      position: relative; width: 1380px; margin: 0 auto;
+      background: #fff; border-radius: 14px; box-shadow: 0 2px 14px rgba(0,0,0,.06);
+      background-image: radial-gradient(circle, #e8ecf0 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* ── SVG layer ──────────────────────────── */
+    .connections { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
+    .conn       { stroke: #b4bcc6; stroke-width: 2; fill: none; }
+    .conn-data  { stroke: #0078d4; stroke-width: 2.2; fill: none; stroke-dasharray: 7 3; }
+    .conn-ai    { stroke: #8661c5; stroke-width: 2.2; fill: none; }
+    .conn-trig  { stroke: #e8590c; stroke-width: 2.2; fill: none; stroke-dasharray: 5 4; }
+    .conn-prod  { stroke: #107c10; stroke-width: 2.2; fill: none; }
+    .conn-sub   { stroke: #c8cdd3; stroke-width: 1.5; fill: none; stroke-dasharray: 3 4; }
+
+    /* ── Node ────────────────────────────────── */
+    .node {
+      position: absolute; display: flex; flex-direction: column; align-items: center;
+      text-align: center; z-index: 10; transform: translateX(-50%); transition: transform .12s;
+    }
+    .node:hover { transform: translateX(-50%) scale(1.06); }
+    .node img { width: 52px; height: 52px; margin-bottom: 5px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.08)); }
+    .node .label { font-size: 0.7rem; font-weight: 600; color: #1a1a2e; max-width: 115px; line-height: 1.25; }
+    .node .sub   { font-size: 0.6rem; color: #888; max-width: 115px; }
+
+    /* ── External Actor ──────────────────────── */
+    .actor {
+      position: absolute; display: flex; flex-direction: column; align-items: center;
+      z-index: 10; transform: translateX(-50%);
+    }
+    .actor-icon {
+      width: 54px; height: 54px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 5px;
+    }
+    .actor-sf   { background: #00a1e0; color: #fff; }
+    .actor-user { background: #0078d4; color: #fff; }
+    .actor-erp  { background: #b4472a; color: #fff; }
+    .actor .label { font-size: 0.7rem; font-weight: 600; }
+    .actor .sub   { font-size: 0.6rem; color: #888; }
+
+    /* ── Group Box ───────────────────────────── */
+    .gbox {
+      position: absolute; border: 2px dashed; border-radius: 12px; z-index: 2;
+      background: rgba(255,255,255,.45);
+    }
+    .gbox .gtitle {
+      position: absolute; top: -11px; left: 16px;
+      background: #fff; padding: 0 8px; font-size: 0.68rem;
+      font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
+    }
+    .gbox-blue   { border-color: #0078d4; } .gbox-blue   .gtitle { color: #0078d4; }
+    .gbox-purple { border-color: #8661c5; } .gbox-purple .gtitle { color: #8661c5; }
+    .gbox-green  { border-color: #107c10; } .gbox-green  .gtitle { color: #107c10; }
+    .gbox-orange { border-color: #e8590c; } .gbox-orange .gtitle { color: #e8590c; }
+    .gbox-red    { border-color: #c4314b; } .gbox-red    .gtitle { color: #c4314b; }
+    .gbox-indigo { border-color: #5c2d91; } .gbox-indigo .gtitle { color: #5c2d91; }
+
+    /* ── Flow Label ──────────────────────────── */
+    .fl {
+      position: absolute; font-size: 0.58rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px; z-index: 20; white-space: nowrap;
+    }
+    .fl-blue   { background: #e0f0ff; color: #0078d4; }
+    .fl-purple { background: #f0e8ff; color: #6b21a8; }
+    .fl-orange { background: #fff3e0; color: #e8590c; }
+    .fl-green  { background: #e6f4ea; color: #107c10; }
+    .fl-gray   { background: #eee; color: #555; }
+
+    /* ── Stage Badge ─────────────────────────── */
+    .badge {
+      position: absolute; top: -6px; left: -6px;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.56rem; font-weight: 700; color: #fff; z-index: 15;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .badge-a { background: #0078d4; }
+    .badge-b { background: #8661c5; }
+    .badge-c { background: #e8590c; }
+
+    /* ── Legend ───────────────────────────────── */
+    .legend { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; padding: 16px; margin-top: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; color: #555; }
+    .lswatch { width: 32px; height: 3px; border-radius: 2px; }
+
+    .page-footer { text-align: center; padding: 28px; color: #999; font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Zava Processing Inc. — Architecture Diagrams</h1>
+  <p>AI-Powered Ticket &amp; Invoice Processing Pipeline on Microsoft Azure</p>
+</div>
+
+<div class="toggle-bar">
+  <button class="toggle-btn active" onclick="show('demo')">① Demo Architecture (Current)</button>
+  <button class="toggle-btn" onclick="show('prod')">② Production Architecture (Future)</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  DIAGRAM 1 — DEMO                                        -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="demo" class="diagram-section visible">
+  <div class="diagram-title">Demo Architecture</div>
+  <div class="diagram-subtitle">Single region · Manual stage triggers · Simulated payment · 6 sample tickets · Serverless Cosmos DB</div>
+
+  <div class="canvas" style="height:690px;">
+
+    <!-- SVG connections (coordinate space matches canvas 1380 × 690) -->
+    <svg class="connections" width="1380" height="690" viewBox="0 0 1380 690">
+      <defs>
+        <marker id="a1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#b4bcc6"/></marker>
+        <marker id="a2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#0078d4"/></marker>
+        <marker id="a3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8661c5"/></marker>
+        <marker id="a4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#e8590c"/></marker>
+      </defs>
+
+      <!-- 1  User → SWA -->
+      <line x1="105" y1="90" x2="236" y2="90" class="conn" marker-end="url(#a1)"/>
+      <!-- 2  SWA → Backend -->
+      <line x1="302" y1="90" x2="496" y2="90" class="conn-data" marker-end="url(#a2)"/>
+      <!-- 3  Backend → Cosmos DB -->
+      <line x1="564" y1="90" x2="806" y2="90" class="conn-data" marker-end="url(#a2)"/>
+      <!-- 4  Backend ↓ Blob -->
+      <line x1="530" y1="120" x2="530" y2="228" class="conn-data" marker-end="url(#a2)"/>
+      <!-- 5  Backend ↓ Stage B  (curve left of Blob) -->
+      <path d="M 510,120 Q 390,275 390,408" class="conn-ai" marker-end="url(#a3)"/>
+      <!-- 6  Backend ↓ Stage C  (curve right of Blob) -->
+      <path d="M 550,120 Q 630,275 630,408" class="conn-ai" marker-end="url(#a3)"/>
+      <!-- 7  Stage B → Code Mapping -->
+      <line x1="360" y1="440" x2="192" y2="440" class="conn" marker-end="url(#a1)"/>
+      <!-- 8  Stage C → Payment API -->
+      <line x1="660" y1="440" x2="806" y2="440" class="conn" marker-end="url(#a1)"/>
+      <!-- 9  Stage B → MCP  (up-right, passes below Blob & above Stage C) -->
+      <line x1="415" y1="412" x2="810" y2="268" class="conn-trig" marker-end="url(#a4)"/>
+      <!-- 10 Stage C → MCP  (up-right) -->
+      <line x1="650" y1="412" x2="814" y2="272" class="conn-trig" marker-end="url(#a4)"/>
+      <!-- 11 MCP ↑ Cosmos (clean vertical) -->
+      <line x1="840" y1="228" x2="840" y2="120" class="conn-data" marker-end="url(#a2)"/>
+      <!-- 12 AI Services → Function group (right to left, through open space) -->
+      <line x1="1088" y1="288" x2="670" y2="435" class="conn-ai" marker-end="url(#a3)"/>
+      <!-- 13 AI → Backend (Content Understanding, curve above tier-2) -->
+      <path d="M 1088,270 Q 800,155 560,100" class="conn-ai" marker-end="url(#a3)"/>
+      <!-- 14 Managed ID subtle connector -->
+      <line x1="1088" y1="475" x2="870" y2="118" class="conn-sub"/>
+    </svg>
+
+    <!-- ── Group Boxes ──────────────────────── -->
+    <div class="gbox gbox-blue"   style="top:40px; left:200px;  width:140px; height:115px;"><div class="gtitle">Frontend</div></div>
+    <div class="gbox gbox-blue"   style="top:36px; left:462px;  width:145px; height:235px;"><div class="gtitle">Backend API</div></div>
+    <div class="gbox gbox-green"  style="top:36px; left:770px;  width:150px; height:235px;"><div class="gtitle">Data Layer</div></div>
+    <div class="gbox gbox-orange" style="top:390px; left:90px;  width:810px; height:120px;"><div class="gtitle">Azure Functions (B2 Plan — 5 Apps)</div></div>
+    <div class="gbox gbox-purple" style="top:40px; left:1048px; width:150px; height:480px;"><div class="gtitle">AI &amp; Observability</div></div>
+
+    <!-- ── External: User ───────────────────── -->
+    <div class="actor" style="top:58px; left:78px;">
+      <div class="actor-icon actor-user">👤</div>
+      <div class="label">Demo User</div>
+      <div class="sub">Browser</div>
+    </div>
+
+    <!-- ── Tier 1: Frontend → Backend → Data ── -->
+    <div class="node" style="top:60px; left:270px;">
+      <img src="icons/web/01007-icon-service-Static-Apps.svg" alt="SWA">
+      <div class="label">Static Web App</div>
+      <div class="sub">React + Vite</div>
+    </div>
+    <div class="node" style="top:60px; left:530px;">
+      <div class="badge badge-a">A</div>
+      <img src="icons/containers/10105-icon-service-Container-Registries.svg" alt="Container Apps">
+      <div class="label">Container Apps</div>
+      <div class="sub">FastAPI · Stage A</div>
+    </div>
+    <div class="node" style="top:60px; left:840px;">
+      <img src="icons/databases/10121-icon-service-Azure-Cosmos-DB.svg" alt="Cosmos DB">
+      <div class="label">Cosmos DB</div>
+      <div class="sub">Serverless · NoSQL</div>
+    </div>
+
+    <!-- ── Tier 2: Supporting ───────────────── -->
+    <div class="node" style="top:230px; left:530px;">
+      <img src="icons/storage/10086-icon-service-Storage-Accounts.svg" alt="Blob Storage">
+      <div class="label">Blob Storage</div>
+      <div class="sub">PDF attachments</div>
+    </div>
+    <div class="node" style="top:230px; left:840px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="MCP Server">
+      <div class="label">MCP Server</div>
+      <div class="sub">Cosmos DB Tools</div>
+    </div>
+
+    <!-- ── Tier 3: Functions ────────────────── -->
+    <div class="node" style="top:410px; left:160px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Code Mapping">
+      <div class="label">Code Mapping</div>
+      <div class="sub">Lookup API</div>
+    </div>
+    <div class="node" style="top:410px; left:390px;">
+      <div class="badge badge-b">B</div>
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Stage B">
+      <div class="label">Stage B</div>
+      <div class="sub">AI Processing</div>
+    </div>
+    <div class="node" style="top:410px; left:630px;">
+      <div class="badge badge-c">C</div>
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Stage C">
+      <div class="label">Stage C</div>
+      <div class="sub">Invoice Processing</div>
+    </div>
+    <div class="node" style="top:410px; left:840px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Payment API">
+      <div class="label">Payment API</div>
+      <div class="sub">Simulated</div>
+    </div>
+
+    <!-- ── Right sidebar ────────────────────── -->
+    <div class="node" style="top:62px; left:1120px;">
+      <img src="icons/monitor/00012-icon-service-Application-Insights.svg" alt="App Insights">
+      <div class="label">App Insights</div>
+      <div class="sub">Monitoring</div>
+    </div>
+    <div class="node" style="top:252px; left:1120px;">
+      <img src="icons/ai + machine learning/microsoft-foundry.png" alt="Microsoft Foundry">
+      <div class="label">Microsoft Foundry</div>
+      <div class="sub">Agents V2 · GPT-5-mini</div>
+    </div>
+    <div class="node" style="top:440px; left:1120px;">
+      <img src="icons/identity/10227-icon-service-Managed-Identities.svg" alt="Managed Identity">
+      <div class="label">Managed Identity</div>
+      <div class="sub">RBAC for all services</div>
+    </div>
+
+    <!-- ── Flow Labels ──────────────────────── -->
+    <div class="fl fl-blue"   style="top:70px;  left:365px;">HTTPS API</div>
+    <div class="fl fl-blue"   style="top:70px;  left:650px;">Read / Write</div>
+    <div class="fl fl-gray"   style="top:178px; left:540px;">Upload PDF</div>
+    <div class="fl fl-purple" style="top:262px; left:370px;">HTTP Trigger</div>
+    <div class="fl fl-purple" style="top:262px; left:618px;">HTTP Trigger</div>
+    <div class="fl fl-orange" style="top:330px; left:610px;">MCP Tools</div>
+    <div class="fl fl-purple" style="top:350px; left:870px;">Microsoft Foundry</div>
+    <div class="fl fl-blue"   style="top:170px; left:850px;">↕ Data</div>
+
+  </div><!-- /canvas -->
+
+  <div class="legend">
+    <div class="legend-item"><div class="lswatch" style="background:#b4bcc6;"></div>General flow</div>
+    <div class="legend-item"><div class="lswatch" style="background:repeating-linear-gradient(90deg,#0078d4 0 6px,transparent 6px 9px);"></div>Data read / write</div>
+    <div class="legend-item"><div class="lswatch" style="background:#8661c5;"></div>AI / Agent call</div>
+    <div class="legend-item"><div class="lswatch" style="background:repeating-linear-gradient(90deg,#e8590c 0 4px,transparent 4px 8px);"></div>MCP tool call</div>
+    <div class="legend-item"><div style="width:20px;height:20px;border-radius:50%;background:#0078d4;color:#fff;font-size:.55rem;display:flex;align-items:center;justify-content:center;font-weight:700;">A</div>Pipeline stage</div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  DIAGRAM 2 — PRODUCTION                                  -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<section id="prod" class="diagram-section">
+  <div class="diagram-title">Production Architecture</div>
+  <div class="diagram-subtitle">Multi-region · Change Feed triggers · Real payment integration · 4M+ tickets/week · VNet + Private Endpoints · APIM AI Gateway</div>
+
+  <div class="canvas" style="height:920px;">
+
+    <svg class="connections" width="1380" height="920" viewBox="0 0 1380 920">
+      <defs>
+        <marker id="p1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#b4bcc6"/></marker>
+        <marker id="p2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#0078d4"/></marker>
+        <marker id="p3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8661c5"/></marker>
+        <marker id="p4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#e8590c"/></marker>
+        <marker id="p5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#107c10"/></marker>
+      </defs>
+
+      <!-- 1  Salesforce → Logic App -->
+      <line x1="105" y1="82" x2="228" y2="82" class="conn-prod" marker-end="url(#p5)"/>
+      <!-- 2  Logic App → Front Door -->
+      <line x1="292" y1="82" x2="418" y2="82" class="conn-prod" marker-end="url(#p5)"/>
+      <!-- 3  Front Door → Backend -->
+      <line x1="482" y1="82" x2="628" y2="82" class="conn-data" marker-end="url(#p2)"/>
+      <!-- 4  Backend → Cosmos DB -->
+      <line x1="692" y1="82" x2="888" y2="82" class="conn-data" marker-end="url(#p2)"/>
+      <!-- 5  Users → Front Door (diagonal up-right, passes below Logic App) -->
+      <line x1="105" y1="230" x2="430" y2="100" class="conn" marker-end="url(#p1)"/>
+      <!-- 6  Backend ↓ Blob -->
+      <line x1="660" y1="112" x2="660" y2="210" class="conn-data" marker-end="url(#p2)"/>
+      <!-- 7  Backend → Service Bus (gentle curve down-left) -->
+      <path d="M 640,112 Q 540,168 450,210" class="conn-data" marker-end="url(#p2)"/>
+      <!-- 8  Cosmos → Stage B (Change Feed — curve right then down-left, avoids Blob) -->
+      <path d="M 940,112 Q 1000,330 390,370" class="conn-trig" marker-end="url(#p4)"/>
+      <!-- 9  Cosmos → Stage C (Change Feed — curve right then down) -->
+      <path d="M 950,112 Q 1020,320 620,370" class="conn-trig" marker-end="url(#p4)"/>
+      <!-- 10 Stage B → APIM -->
+      <line x1="390" y1="425" x2="485" y2="535" class="conn-ai" marker-end="url(#p3)"/>
+      <!-- 11 Stage C → APIM -->
+      <line x1="610" y1="425" x2="515" y2="535" class="conn-ai" marker-end="url(#p3)"/>
+      <!-- 12 APIM → MCP Function -->
+      <line x1="480" y1="590" x2="320" y2="692" class="conn" marker-end="url(#p1)"/>
+      <!-- 13 APIM → Code Mapping API -->
+      <line x1="500" y1="590" x2="500" y2="692" class="conn" marker-end="url(#p1)"/>
+      <!-- 14 APIM → Payment API -->
+      <line x1="520" y1="590" x2="680" y2="692" class="conn" marker-end="url(#p1)"/>
+      <!-- 15 Payment API → ERP -->
+      <line x1="730" y1="722" x2="888" y2="735" class="conn-prod" marker-end="url(#p5)"/>
+      <!-- 16 MCP Function → Cosmos DB (cubic bezier sweeps along right side) -->
+      <path d="M 340,693 C 1040,600 1040,110 940,100" class="conn-data" stroke-dasharray="6 4" marker-end="url(#p2)"/>
+      <!-- 17 AI Services → Stage B/C (horizontal left through open space) -->
+      <line x1="1105" y1="398" x2="655" y2="398" class="conn-ai" marker-end="url(#p3)"/>
+      <!-- 18 SignalR → Users (route along bottom edge, then up left side) -->
+      <path d="M 1105,825 L 120,825 L 100,262" class="conn" stroke-dasharray="4 4" marker-end="url(#p1)"/>
+    </svg>
+
+    <!-- ── Group Boxes ──────────────────────── -->
+    <div class="gbox gbox-green"  style="top:35px;  left:382px;  width:155px; height:112px;"><div class="gtitle">Edge / CDN</div></div>
+    <div class="gbox gbox-blue"   style="top:35px;  left:590px;  width:155px; height:228px;"><div class="gtitle">Backend (VNet)</div></div>
+    <div class="gbox gbox-green"  style="top:35px;  left:855px;  width:155px; height:120px;"><div class="gtitle">Data (Multi-Region)</div></div>
+    <div class="gbox gbox-orange" style="top:350px; left:148px;  width:550px; height:112px;"><div class="gtitle">Azure Functions (Premium EP1 — Elastic)</div></div>
+    <div class="gbox gbox-purple" style="top:515px; left:420px;  width:170px; height:110px;"><div class="gtitle">AI Gateway</div></div>
+    <div class="gbox gbox-orange" style="top:672px; left:220px;  width:570px; height:110px;"><div class="gtitle">MCP &amp; API Functions (via APIM)</div></div>
+    <div class="gbox gbox-purple" style="top:40px;  left:1050px; width:145px; height:410px;"><div class="gtitle">AI &amp; Observability</div></div>
+    <div class="gbox gbox-indigo" style="top:500px; left:1050px; width:145px; height:230px;"><div class="gtitle">Security</div></div>
+
+    <!-- ── Externals ────────────────────────── -->
+    <div class="actor" style="top:52px; left:75px;">
+      <div class="actor-icon actor-sf">☁️</div>
+      <div class="label">Salesforce</div>
+      <div class="sub">Platform Events</div>
+    </div>
+    <div class="actor" style="top:200px; left:75px;">
+      <div class="actor-icon actor-user">👥</div>
+      <div class="label">End Users</div>
+      <div class="sub">Operations Team</div>
+    </div>
+    <div class="actor" style="top:700px; left:920px;">
+      <div class="actor-icon actor-erp">💳</div>
+      <div class="label">ERP / Payment</div>
+      <div class="sub">SAP · Oracle</div>
+    </div>
+
+    <!-- ── Tier 1: Integration → Edge → Backend → Data ── -->
+    <div class="node" style="top:55px; left:260px;">
+      <img src="icons/integration/02631-icon-service-Logic-Apps.svg" alt="Logic Apps">
+      <div class="label">Logic App</div>
+      <div class="sub">Salesforce Connector</div>
+    </div>
+    <div class="node" style="top:55px; left:450px;">
+      <img src="icons/networking/10073-icon-service-Front-Door-and-CDN-Profiles.svg" alt="Front Door">
+      <div class="label">Azure Front Door</div>
+      <div class="sub">WAF + global LB</div>
+    </div>
+    <div class="node" style="top:55px; left:660px;">
+      <div class="badge badge-a">A</div>
+      <img src="icons/containers/10105-icon-service-Container-Registries.svg" alt="Container Apps">
+      <div class="label">Container Apps</div>
+      <div class="sub">FastAPI · Autoscale 50</div>
+    </div>
+    <div class="node" style="top:55px; left:920px;">
+      <img src="icons/databases/10121-icon-service-Azure-Cosmos-DB.svg" alt="Cosmos DB">
+      <div class="label">Cosmos DB</div>
+      <div class="sub">Provisioned · Multi-write</div>
+    </div>
+
+    <!-- ── Tier 2: Supporting Services ──────── -->
+    <div class="node" style="top:212px; left:450px;">
+      <img src="icons/integration/10836-icon-service-Azure-Service-Bus.svg" alt="Service Bus">
+      <div class="label">Service Bus</div>
+      <div class="sub">Extraction Queue</div>
+    </div>
+    <div class="node" style="top:212px; left:660px;">
+      <img src="icons/storage/10086-icon-service-Storage-Accounts.svg" alt="Blob Storage">
+      <div class="label">Blob Storage</div>
+      <div class="sub">Private Endpoint</div>
+    </div>
+
+    <!-- ── Tier 3: Agent Functions ──────────── -->
+    <div class="node" style="top:370px; left:210px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Code Mapping">
+      <div class="label">Code Mapping</div>
+      <div class="sub">Lookup Function</div>
+    </div>
+    <div class="node" style="top:370px; left:390px;">
+      <div class="badge badge-b">B</div>
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Stage B">
+      <div class="label">Stage B</div>
+      <div class="sub">Change Feed Trigger</div>
+    </div>
+    <div class="node" style="top:370px; left:620px;">
+      <div class="badge badge-c">C</div>
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Stage C">
+      <div class="label">Stage C</div>
+      <div class="sub">Change Feed Trigger</div>
+    </div>
+
+    <!-- ── Tier 4: APIM ────────────────────── -->
+    <div class="node" style="top:538px; left:500px;">
+      <img src="icons/web/10042-icon-service-API-Management-Services.svg" alt="APIM">
+      <div class="label">API Management</div>
+      <div class="sub">Rate limit · Auth · Cache</div>
+    </div>
+
+    <!-- ── Tier 5: API Functions ────────────── -->
+    <div class="node" style="top:695px; left:300px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="MCP Server">
+      <div class="label">MCP Server</div>
+      <div class="sub">Cosmos DB Tools</div>
+    </div>
+    <div class="node" style="top:695px; left:500px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Code Mapping API">
+      <div class="label">Code Mapping</div>
+      <div class="sub">API</div>
+    </div>
+    <div class="node" style="top:695px; left:700px;">
+      <img src="icons/compute/10029-icon-service-Function-Apps.svg" alt="Payment API">
+      <div class="label">Payment API</div>
+      <div class="sub">ERP Integration</div>
+    </div>
+
+    <!-- ── Right sidebar: AI & Observability ── -->
+    <div class="node" style="top:58px; left:1120px;">
+      <img src="icons/monitor/00012-icon-service-Application-Insights.svg" alt="App Insights">
+      <div class="label">App Insights</div>
+      <div class="sub">Distributed Tracing</div>
+    </div>
+    <div class="node" style="top:195px; left:1120px;">
+      <img src="icons/monitor/00001-icon-service-Monitor.svg" alt="Azure Monitor">
+      <div class="label">Azure Monitor</div>
+      <div class="sub">Alerts + Dashboards</div>
+    </div>
+    <div class="node" style="top:365px; left:1120px;">
+      <img src="icons/ai + machine learning/microsoft-foundry.png" alt="Microsoft Foundry">
+      <div class="label">Microsoft Foundry</div>
+      <div class="sub">Agents V2 · GPT-5-mini</div>
+    </div>
+
+    <!-- ── Right sidebar: Security ──────────── -->
+    <div class="node" style="top:520px; left:1120px;">
+      <img src="icons/security/10245-icon-service-Key-Vaults.svg" alt="Key Vault">
+      <div class="label">Key Vault</div>
+      <div class="sub">Secrets · Certs</div>
+    </div>
+    <div class="node" style="top:650px; left:1120px;">
+      <img src="icons/identity/10227-icon-service-Managed-Identities.svg" alt="Managed Identity">
+      <div class="label">Managed Identity</div>
+      <div class="sub">Entra ID RBAC</div>
+    </div>
+
+    <!-- ── Bottom corners ───────────────────── -->
+    <div class="node" style="top:800px; left:1120px;">
+      <img src="icons/web/10052-icon-service-SignalR.svg" alt="SignalR">
+      <div class="label">Azure SignalR</div>
+      <div class="sub">Real-time updates</div>
+    </div>
+    <div class="node" style="top:370px; left:100px;">
+      <img src="icons/networking/10061-icon-service-Virtual-Networks.svg" alt="VNet">
+      <div class="label">Virtual Network</div>
+      <div class="sub">Private Endpoints</div>
+    </div>
+    <div class="node" style="top:800px; left:100px;">
+      <img src="icons/devops/10261-icon-service-Azure-DevOps.svg" alt="Azure DevOps">
+      <div class="label">Azure DevOps</div>
+      <div class="sub">CI/CD Pipeline</div>
+    </div>
+
+    <!-- ── Flow Labels ──────────────────────── -->
+    <div class="fl fl-green"  style="top:62px;  left:152px;">Webhook</div>
+    <div class="fl fl-green"  style="top:62px;  left:336px;">WAF</div>
+    <div class="fl fl-blue"   style="top:62px;  left:548px;">HTTPS</div>
+    <div class="fl fl-blue"   style="top:62px;  left:775px;">Read / Write</div>
+    <div class="fl fl-gray"   style="top:168px; left:670px;">Upload PDF</div>
+    <div class="fl fl-gray"   style="top:172px; left:498px;">Queue</div>
+    <div class="fl fl-orange" style="top:300px; left:780px;">Change Feed</div>
+    <div class="fl fl-purple" style="top:476px; left:410px;">Agent → APIM</div>
+    <div class="fl fl-gray"   style="top:640px; left:505px;">Route to APIs</div>
+    <div class="fl fl-green"  style="top:758px; left:810px;">ERP Callback</div>
+    <div class="fl fl-purple" style="top:330px; left:870px;">Microsoft Foundry</div>
+    <div class="fl fl-blue"   style="top:635px; left:165px;">MCP → Cosmos ↗</div>
+
+  </div><!-- /canvas -->
+
+  <div class="legend">
+    <div class="legend-item"><div class="lswatch" style="background:#b4bcc6;"></div>General flow</div>
+    <div class="legend-item"><div class="lswatch" style="background:repeating-linear-gradient(90deg,#0078d4 0 6px,transparent 6px 9px);"></div>Data read / write</div>
+    <div class="legend-item"><div class="lswatch" style="background:#8661c5;"></div>AI / Agent call</div>
+    <div class="legend-item"><div class="lswatch" style="background:repeating-linear-gradient(90deg,#e8590c 0 4px,transparent 4px 8px);"></div>Change Feed trigger</div>
+    <div class="legend-item"><div class="lswatch" style="background:#107c10;"></div>Production addition</div>
+    <div class="legend-item"><div style="width:20px;height:20px;border-radius:50%;background:#0078d4;color:#fff;font-size:.55rem;display:flex;align-items:center;justify-content:center;font-weight:700;">A</div>Pipeline stage</div>
+  </div>
+</section>
+
+<div class="page-footer">Zava Processing Inc. — AI Ticket Processing System · Architecture Diagrams · February 2026</div>
+
+<script>
+function show(w) {
+  document.getElementById('demo').classList.toggle('visible', w === 'demo');
+  document.getElementById('prod').classList.toggle('visible', w === 'prod');
+  document.querySelectorAll('.toggle-btn').forEach(function(b, i) {
+    b.classList.toggle('active', (i === 0 && w === 'demo') || (i === 1 && w === 'prod'));
+  });
+}
+</script>
+</body>
+</html>

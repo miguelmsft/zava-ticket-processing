@@ -1,0 +1,212 @@
+openapi: "3.0.3"
+info:
+  title: Zava Code Mapping API
+  description: |
+    Provides lookup endpoints for Zava Processing Inc. standardized codes.
+    Used by Foundry Agent V2 as an OpenAPI tool to standardize vendor codes,
+    product codes, department codes, and action codes during ticket processing.
+  version: "1.0.0"
+  contact:
+    name: Zava Processing Inc.
+
+servers:
+  - url: https://{apim-host}/code-mapping
+    description: Azure API Management (production)
+    variables:
+      apim-host:
+        default: zava-apim.azure-api.net
+  - url: http://localhost:7072/api
+    description: Local development
+
+paths:
+  /codes:
+    get:
+      operationId: listMappingTypes
+      summary: List available mapping types
+      description: |
+        Returns the list of available code mapping categories with
+        descriptions and the count of codes in each category.
+      responses:
+        "200":
+          description: List of mapping types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mappingTypes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: The mapping type identifier
+                          example: vendor_codes
+                        description:
+                          type: string
+                          description: Human-readable description
+                        codeCount:
+                          type: integer
+                          description: Number of codes in this category
+
+  /codes/{mapping_type}:
+    get:
+      operationId: listCodesByType
+      summary: List all codes for a mapping type
+      description: |
+        Returns all code mappings for the specified type.
+        Valid types: vendor_codes, product_codes, department_codes, action_codes.
+      parameters:
+        - name: mapping_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - vendor_codes
+              - product_codes
+              - department_codes
+              - action_codes
+          description: The type of code mapping to retrieve
+      responses:
+        "200":
+          description: All codes for the mapping type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mappingType:
+                    type: string
+                  description:
+                    type: string
+                  mappings:
+                    type: object
+                    additionalProperties: true
+        "404":
+          description: Unknown mapping type
+
+  /codes/{mapping_type}/{code}:
+    get:
+      operationId: lookupCode
+      summary: Look up a specific code
+      description: |
+        Looks up a specific code within a mapping type and returns the
+        standardized result. Case-insensitive matching is supported.
+
+        Examples:
+        - vendor_codes / "ABC Industrial Supplies" → returns vendorCode, region, paymentTerms
+        - product_codes / "VLV-4200-IND" → returns standardCode, productName, expectedPriceRange
+        - department_codes / "Valves & Flow Control" → returns departmentCode, costCenter
+        - action_codes / "valid_invoice_all_checks_pass" → returns nextAction, description
+      parameters:
+        - name: mapping_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - vendor_codes
+              - product_codes
+              - department_codes
+              - action_codes
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          description: |
+            The code to look up. For vendor_codes this is the vendor name.
+            For product_codes this is the raw product code from the invoice.
+            For department_codes this is the product category.
+            For action_codes this is the condition key.
+      responses:
+        "200":
+          description: Code found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mappingType:
+                    type: string
+                  inputCode:
+                    type: string
+                  result:
+                    type: object
+                    additionalProperties: true
+        "404":
+          description: Code not found
+
+  /codes/batch:
+    post:
+      operationId: batchLookup
+      summary: Batch code lookup
+      description: |
+        Resolve multiple codes in a single request. Useful for standardizing
+        all codes on an invoice at once (vendor, products, departments).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lookups
+              properties:
+                lookups:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - code
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - vendor_codes
+                          - product_codes
+                          - department_codes
+                          - action_codes
+                      code:
+                        type: string
+              example:
+                lookups:
+                  - type: vendor_codes
+                    code: "ABC Industrial Supplies"
+                  - type: product_codes
+                    code: "VLV-4200-IND"
+                  - type: department_codes
+                    code: "Valves & Flow Control"
+      responses:
+        "200":
+          description: Batch lookup results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lookupCount:
+                    type: integer
+                  foundCount:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        found:
+                          type: boolean
+                        result:
+                          type: object
+                          additionalProperties: true
+                        error:
+                          type: string
+        "400":
+          description: Invalid request body
