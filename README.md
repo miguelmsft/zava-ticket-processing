@@ -2,7 +2,24 @@
 
 An AI-powered ticket processing pipeline that automates invoice extraction, validation, and payment for **Zava Processing Inc.**, a fictional industrial processing company.
 
-Built on Azure with Python, FastAPI, Azure Cosmos DB, and Azure AI services.
+Built on Azure with Python, FastAPI, Azure Cosmos DB, and Azure AI Foundry Agent Service V2.
+
+---
+
+## Table of Contents
+
+- [What It Does](#what-it-does)
+- [Application Screenshots](#application-screenshots)
+- [Architecture Overview](#architecture-overview)
+- [Pipeline Trigger Flow](#pipeline-trigger-flow)
+- [AI Agents](#ai-agents)
+- [Full Demo vs. Production Comparison](#full-demo-vs-production-comparison)
+- [What's Built](#whats-built)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Technology Stack](#technology-stack)
+- [Documentation](#documentation)
 
 ---
 
@@ -141,6 +158,101 @@ Case created ──▶ Platform Event / Outbound Message
 - **Salesforce callback** — after Stage C completes, the system can call back to Salesforce to update the case status, close the ticket, or attach the payment confirmation
 
 > **Note:** The demo's HTTP-trigger architecture (`POST /process-ai`, `POST /process-invoice`) was chosen intentionally — it is simpler to debug, easier to demo, and the same Azure Functions can be reused behind Change Feed triggers in production with minimal code changes (the Function body stays the same, only the trigger binding changes from `httpTrigger` to `cosmosDBTrigger`).
+
+---
+
+## AI Agents
+
+This system uses two **Azure AI Foundry Agent Service V2** agents, each running as a persistent agent created via the `azure-ai-projects` Python SDK. Both agents use the **Responses API** (not the classic Assistants API) and persist across requests — visible and manageable in the [Foundry portal](https://ai.azure.com).
+
+### Agent 1: Information Processing Agent (Stage B)
+
+**Purpose:** Reads extracted ticket data, standardizes vendor/product/department codes using embedded reference tables, generates a natural-language summary, and assigns the appropriate next action (e.g., route to invoice processing, flag for manual review, escalate to vendor approval).
+
+**Tools:**
+- **MCP Tool** — Cosmos DB MCP Server (`read_ticket`, `update_ticket`) for reading and writing ticket data
+
+**Prompt approach:** The system instructions embed the full code mapping reference tables (vendor codes, product codes, department codes, action codes) directly in the prompt so the agent can perform lookups without external API calls. The user message simply tells the agent which ticket ID to process.
+
+**Key files:**
+
+| File | Role |
+|------|------|
+| `functions/stage_b_ai_processing/agent_logic.py` | Agent instructions, prompt template, response parser |
+| `functions/stage_b_ai_processing/function_app.py` | Agent lifecycle (create/cache/run), MCP approval handling |
+| `functions/stage_b_ai_processing/code_mappings.json` | Vendor, product, department, and action code reference data |
+
+### Agent 2: Invoice Processing Agent (Stage C)
+
+**Purpose:** Validates invoices (number format, amount, due date, vendor approval, budget), submits payment via the Payment API if all checks pass, and records all results back to the database.
+
+**Tools:**
+- **MCP Tool** — Cosmos DB MCP Server (`read_ticket`, `update_ticket`) for reading and writing ticket data
+- **Function Tools** — Payment Processing API (`validate_invoice`, `submit_payment`, `get_payment_status`) executed client-side via HTTP calls to the Payment Azure Function
+
+**Prompt approach:** The system instructions define a strict 4-step workflow (read → validate → pay → persist) with explicit JSON schemas for the expected output. The agent autonomously decides whether to submit payment based on the validation response.
+
+**Key files:**
+
+| File | Role |
+|------|------|
+| `functions/stage_c_invoice_processing/invoice_agent_logic.py` | Agent instructions, response parser |
+| `functions/stage_c_invoice_processing/function_app.py` | Agent lifecycle, function tool execution loop, MCP + Payment API handling |
+| `functions/api_payment/payment_logic.py` | Payment validation and submission logic (called by agent via function tools) |
+
+### How agents are created and run
+
+Both agents follow the same pattern — **create once, reuse across requests**:
+
+```python
+from azure.ai.projects import AIProjectClient
+from azure.ai.projects.models import PromptAgentDefinition, MCPTool
+from azure.identity import DefaultAzureCredential
+
+# Initialize the Foundry project client
+project_client = AIProjectClient(
+    endpoint=AI_PROJECT_ENDPOINT,
+    credential=DefaultAzureCredential(),
+)
+
+# Define the agent with MCP tools
+definition = PromptAgentDefinition(
+    model="gpt-5-mini",
+    instructions=AGENT_INSTRUCTIONS,
+    tools=[
+        MCPTool(
+            server_label="cosmos-db-tickets",
+            server_url=MCP_COSMOS_ENDPOINT,
+            require_approval="never",
+        )
+    ],
+)
+
+# Create a persistent agent (visible in Foundry portal)
+agent = project_client.agents.create_version(
+    agent_name="information-processing-agent",
+    definition=definition,
+)
+
+# Run the agent via the Responses API
+openai_client = project_client.get_openai_client()
+response = openai_client.responses.create(
+    input="Process ticket 'ZAVA-2026-00001'...",
+    extra_body={
+        "agent": {
+            "type": "agent_reference",
+            "name": agent.name,
+            "version": agent.version,
+        },
+    },
+)
+```
+
+### Supporting MCP Server
+
+The agents connect to a **Cosmos DB MCP Server** (`functions/mcp_cosmos/`) — an Azure Function that exposes ticket read/write operations as [remote MCP tools](https://learn.microsoft.com/azure/azure-functions/scenario-custom-remote-mcp-server). This is deployed behind Azure API Management (AI Gateway) in production.
+
+---
 
 ### Full demo vs. production comparison
 
@@ -344,6 +456,7 @@ Six realistic demo tickets with generated PDF invoices:
 - Python 3.11+
 - Node.js 18+ and npm
 - Azure Cosmos DB account (or [emulator](https://learn.microsoft.com/azure/cosmos-db/emulator))
+- Azure AI Foundry project with model deployments (GPT-5-mini) *(required for Stage B & C AI agents; falls back to local simulation without it)*
 - Azure Blob Storage account *(optional — uploads are skipped if not configured)*
 - Azure Content Understanding resource *(optional — falls back to regex)*
 
